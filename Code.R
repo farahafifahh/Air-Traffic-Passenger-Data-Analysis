@@ -24,6 +24,9 @@ data_new <- data
 # Data Cleaning ====
 
 # Converting data type of variables
+data_new$Activity.Period <- as.numeric(data_new$Activity.Period)
+data_new$Operating.Airline <- as.factor(data_new$Operating.Airline)
+data_new$Operating.Airline.IATA.Code <- as.factor(data_new$Operating.Airline.IATA.Code)
 data_new$Published.Airline <- as.factor(data_new$Published.Airline)
 data_new$Published.Airline.IATA.Code <- as.factor(data_new$Published.Airline.IATA.Code)
 data_new$GEO.Summary <- as.factor(data_new$GEO.Summary)
@@ -33,6 +36,8 @@ data_new$Price.Category.Code <- as.factor(data_new$Price.Category.Code)
 data_new$Terminal <- as.factor(data_new$Terminal)
 data_new$Boarding.Area <- as.factor(data_new$Boarding.Area)
 data_new$Passenger.Count <- as.numeric(data_new$Passenger.Count)
+data_new$Adjusted.Activity.Type.Code <- as.factor(data_new$Adjusted.Activity.Type.Code)
+data_new$Adjusted.Passenger.Count <- as.numeric(data_new$Adjusted.Passenger.Count)
 data_new$Year <- as.factor(data_new$Year)
 data_new$Month <- as.factor(data_new$Month)
 
@@ -40,25 +45,31 @@ data_new$Month <- as.factor(data_new$Month)
 data_new$GEO.Summary<-ifelse(data_new$GEO.Summary=="Domestic",1,0)
 data_new$GEO.Summary <- as.logical(data_new$GEO.Summary)
 
-# Remove unnecessary column
-data_new$Activity.Period <- NULL
-data_new$Adjusted.Activity.Type.Code <- NULL
-data_new$Adjusted.Passenger.Count <- NULL
-data_new$Operating.Airline <- NULL
-data_new$Operating.Airline.IATA.Code <- NULL
-
 # Changing names of column
-names(data_new) [1] <- "airline"
-names(data_new) [2] <- "code"
-names(data_new) [3] <- "isDomestic"
-names(data_new) [4] <- "region"
-names(data_new) [5] <- "type"
-names(data_new) [6] <- "category"
-names(data_new) [7] <- "terminal"
-names(data_new) [8] <- "area"
-names(data_new) [9] <- "pax"
-names(data_new) [10] <- "year"
-names(data_new) [11] <- "month"
+names(data_new) [1] <- "activity period"
+names(data_new) [2] <- "operating airline"
+names(data_new) [3] <- "operating code"
+names(data_new) [4] <- "airline"
+names(data_new) [5] <- "code"
+names(data_new) [6] <- "isDomestic"
+names(data_new) [7] <- "region"
+names(data_new) [8] <- "type"
+names(data_new) [9] <- "category"
+names(data_new) [10] <- "terminal"
+names(data_new) [11] <- "area"
+names(data_new) [12] <- "pax"
+names(data_new) [13] <- "adjusted type"
+names(data_new) [14] <- "adjusted pax"
+names(data_new) [15] <- "year"
+names(data_new) [16] <- "month"
+
+# Remove unnecessary column
+data_new$`activity period` <- NULL
+data_new$`adjusted type` <- NULL
+data_new$`adjusted pax` <- NULL
+data_new$`operating airline` <- NULL
+data_new$`operating code` <- NULL
+
 
 # Standardize United Airlines
 data_new$airline[data_new$airline =="United Airlines - Pre 07/01/2013"] <- "United Airlines"

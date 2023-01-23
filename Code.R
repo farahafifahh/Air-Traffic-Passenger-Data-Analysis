@@ -6,10 +6,13 @@ data <- read.csv("Air_Traffic_Passenger_Data.csv")
 
 # Libraries
 library(ggplot2)
+library(dplyr)
 library(plotrix)
 library(e1071)
+library(magrittr)
 library(caret)
 library(caTools)
+install.packages("plotly")
 library(tidyverse)
 
 # Print the summary of the imported data
@@ -62,3 +65,30 @@ data_new$airline[data_new$airline =="United Airlines - Pre 07/01/2013"] <- "Unit
 
 # Summary of the data after cleaning
 summary(data_new)
+
+# 1. Average Passenger Traffic between 2005 and 2016 ====
+
+# Group the passenger traffic by mean of pax
+passengerTraffic = data_new %>% group_by(isDomestic, month) %>%
+  summarise(averagePax = round(mean(pax), digit = 0),
+            .groups = 'drop')
+
+# Plot the stacked bar graph
+plot <- ggplot(passengerTraffic, aes(x = factor(month, labels = month.abb), 
+                             y = averagePax, fill = isDomestic)) +
+  geom_bar(stat = "identity", alpha = 0.8) +
+  theme_minimal() +
+  scale_fill_discrete(name = "Destination", label = c("International", "Domestic")) +
+  labs (x = "Month", y = "Passengers") +
+  ggtitle("Monthly Average Passengers Count") +
+  geom_text(aes(label = format(averagePax, big.mark = ",")), size = 2.75,
+            position = position_stack(vjust = 0.5), colour = "white")
+plot + theme(
+  plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
+  axis.title.x = element_text(color="black", size=14, face="bold"),
+  axis.title.y = element_text(color="black", size=14, face="bold")
+)
+
+
+
+

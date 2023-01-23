@@ -102,22 +102,36 @@ plot + theme(
 
 # 2. Domestic Carriers Overview
 
-# Filter the top 5 airlines by domestic passenger count
-top5DomesticList <- data_new %>%
+# Domestic Airline
+domesticAirline = data_new %>% group_by(isDomestic) %>%
+  summarise()
+
+# Domestic Passenger Count
+domesticPassenger = data_new %>% 
   filter(isDomestic) %>%
   group_by(airline) %>%
-  summarise(totalPax = sum(pax)) %>%
-  top_n(5, totalPax) %>%
-  arrange(totalPax) %>%
-  select(-totalPax)
+  summarise(countPassenger = sum(pax),
+            .groups = 'drop')
 
-<<<<<<< HEAD
-=======
-# Combine and compute the other airlines
-otherDomesticAirline <- data_new %>%
-  filter(!(airline %in% top5DomesticList$airline)) %>%
-  group_by(year) %>%
-  summarise(sum = sum(pax)) %>%
-  mutate(airline = "Other Airlines") %>%
-  select(airline, year, sum)
->>>>>>> f67208320f7572bc8073cc1f16ff88a2b9de25a6
+# Sort descending by countPassenger
+domesticPassenger <- domesticPassenger[order(-domesticPassenger$countPassenger),]
+
+# Only show top 5 or airline that has the most passengers
+domesticPassenger <- domesticPassenger[1:5,]
+
+plot <- ggplot(domesticPassenger, aes(x = reorder(airline, -countPassenger), y = countPassenger)) +
+  theme_minimal() +
+  geom_bar(stat = "identity") +
+  geom_col(fill = "#E59393", color = "#D62D2D") +
+  geom_text(aes(label = format(countPassenger, big.mark = ",")), size = 2.75,
+            position = position_stack(vjust = 0.5), colour = "white")+
+  labs(y = "Passengers", x = "Airline") +
+  ggtitle("Domestic Passengers Count by Airline")
+plot + theme(
+  plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
+  axis.title.x = element_text(color="black", size=14, face="bold"),
+  axis.title.y = element_text(color="black", size=14, face="bold")
+)
+
+
+

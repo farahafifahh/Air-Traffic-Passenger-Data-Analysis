@@ -89,6 +89,21 @@ plot + theme(
   axis.title.y = element_text(color="black", size=14, face="bold")
 )
 
+# 2. Domestic Carriers Overview
 
+# Filter the top 5 airlines by domestic passenger count
+top5DomesticList <- data_new %>%
+  filter(isDomestic) %>%
+  group_by(airline) %>%
+  summarise(totalPax = sum(pax)) %>%
+  top_n(5, totalPax) %>%
+  arrange(totalPax) %>%
+  select(-totalPax)
 
-
+# Combine and compute the other airlines
+otherDomesticAirline <- data_new %>%
+  filter(!(airline %in% top5DomesticList$airline)) %>%
+  group_by(year) %>%
+  summarise(sum = sum(pax)) %>%
+  mutate(airline = "Other Airlines") %>%
+  select(airline, year, sum)

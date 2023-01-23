@@ -11,9 +11,11 @@ library(plotrix)
 library(e1071)
 library(magrittr)
 library(caret)
+library(cluster)
 library(caTools)
-install.packages("plotly")
+library(animation)
 library(tidyverse)
+library(fastDummies)
 
 # Print the summary of the imported data
 summary(data)
@@ -100,7 +102,7 @@ plot + theme(
   axis.title.y = element_text(color="black", size=14, face="bold")
 )
 
-# 2. Domestic Carriers Overview
+# 2. Domestic Carriers Overview ====
 
 # Domestic Airline
 domesticAirline = data_new %>% group_by(isDomestic) %>%
@@ -135,3 +137,21 @@ plot + theme(
 
 
 
+# K-Means Clustering
+
+# Extract id and gender columns by specifying column names
+cluster <- data.frame(data$Passenger.Count, data$Operating.Airline, data$Activity.Period)
+cluster <- dummy_cols(cluster, select_columns = 'data.Operating.Airline')
+
+
+
+# K Means Clustering ====
+cluster = data_new %>% 
+  filter(isDomestic) %>%
+  group_by(airline) %>%
+  summarise(countPassenger = sum(pax),
+            .groups = 'drop')
+
+# Apply a heuristic that uses the Within Sum of Square (WSS) metric
+# to determine a reasonably optimal value of k
+set.seed(123)

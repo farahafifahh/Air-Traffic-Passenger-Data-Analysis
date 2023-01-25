@@ -18,10 +18,10 @@ library(tidyverse)
 library(fastDummies)
 
 # Print the summary of the imported data
-summary(data)
+head(data)
 
 # Duplicate the data as a backup
-data_new <- data
+summary <- data
 
 # Data Cleaning ====
 
@@ -135,23 +135,31 @@ plot + theme(
   axis.title.y = element_text(color="black", size=14, face="bold")
 )
 
+# Prediction of Type of Terminal using Classification (Naïve Bayes) ====
+
+# Create a new dataset to store a new data for naive
+naive <- data_new[-c(2,3,10,11)]
+
+# Summary of naive (same as a data_new)
+summary(naive)
+
+# Split the Data into Train Set and Test Set 
+split <- sample.split(naive, SplitRatio = 0.80) 
+traindata <- subset(naive, split == "TRUE") 
+testdata <- subset(naive, split == "FALSE")
+
+# Build a naïve Bayes classifier
+nbModel <- naiveBayes(terminal ~.,data = traindata)
+
+# View the model
+nbModel
+
+# Prediction using testing dataset
+prediction <- predict(nbModel, newdata = testdata)
+
+# Create a confusion matrix
+cm <- confusionMatrix(prediction, testdata$terminal) 
+print(cm)
 
 
-# K-Means Clustering
 
-# Extract id and gender columns by specifying column names
-cluster <- data.frame(data$Passenger.Count, data$Operating.Airline, data$Activity.Period)
-cluster <- dummy_cols(cluster, select_columns = 'data.Operating.Airline')
-
-
-
-# K Means Clustering ====
-cluster = data_new %>% 
-  filter(isDomestic) %>%
-  group_by(airline) %>%
-  summarise(countPassenger = sum(pax),
-            .groups = 'drop')
-
-# Apply a heuristic that uses the Within Sum of Square (WSS) metric
-# to determine a reasonably optimal value of k
-set.seed(123)

@@ -18,10 +18,10 @@ library(tidyverse)
 library(fastDummies)
 
 # Print the summary of the imported data
-head(data)
+summary(data)
 
 # Duplicate the data as a backup
-summary <- data
+data_new <- data
 
 # Data Cleaning ====
 
@@ -137,10 +137,13 @@ plot + theme(
 
 # Prediction of Type of Terminal using Classification (Naïve Bayes) ====
 
-# Create a new dataset to store a new data for naive
-naive <- data_new[-c(2,3,10,11)]
+# Setting set value for model
+set.seed(200)
 
-# Summary of naive (same as a data_new)
+# Create a new dataset for naive
+naive <- data_new
+
+# Summary of naive
 summary(naive)
 
 # Split the Data into Train Set and Test Set 

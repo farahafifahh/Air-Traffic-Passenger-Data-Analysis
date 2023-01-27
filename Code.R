@@ -87,7 +87,7 @@ passengerTraffic = data_new %>% group_by(isDomestic, month) %>%
             .groups = 'drop')
 
 # Plot the stacked bar graph
-plot <- ggplot(passengerTraffic, aes(x = factor(month, labels = month.abb), 
+plot1 <- ggplot(passengerTraffic, aes(x = factor(month, labels = month.abb), 
                              y = averagePax, fill = isDomestic)) +
   geom_bar(stat = "identity", alpha = 0.8) +
   theme_minimal() +
@@ -96,7 +96,7 @@ plot <- ggplot(passengerTraffic, aes(x = factor(month, labels = month.abb),
   ggtitle("Monthly Average Passengers Count") +
   geom_text(aes(label = format(averagePax, big.mark = ",")), size = 2.75,
             position = position_stack(vjust = 0.5), colour = "white")
-plot + theme(
+plot1 + theme(
   plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
   axis.title.x = element_text(color="black", size=14, face="bold"),
   axis.title.y = element_text(color="black", size=14, face="bold")
@@ -121,7 +121,7 @@ domesticPassenger <- domesticPassenger[order(-domesticPassenger$countPassenger),
 # Only show top 5 or airline that has the most passengers
 domesticPassenger <- domesticPassenger[1:5,]
 
-plot <- ggplot(domesticPassenger, aes(x = reorder(airline, -countPassenger), y = countPassenger)) +
+plot2 <- ggplot(domesticPassenger, aes(x = reorder(airline, -countPassenger), y = countPassenger)) +
   theme_minimal() +
   geom_bar(stat = "identity") +
   geom_col(fill = "#E59393", color = "#D62D2D") +
@@ -129,7 +129,7 @@ plot <- ggplot(domesticPassenger, aes(x = reorder(airline, -countPassenger), y =
             position = position_stack(vjust = 0.5), colour = "white")+
   labs(y = "Passengers", x = "Airline") +
   ggtitle("Domestic Passengers Count by Airline")
-plot + theme(
+plot2 + theme(
   plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
   axis.title.x = element_text(color="black", size=14, face="bold"),
   axis.title.y = element_text(color="black", size=14, face="bold")
@@ -145,28 +145,32 @@ passengerYear = data_new %>%
 data_new %>% 
   ggplot(mapping = aes(x = reorder(year, desc(year)), y = pax, fill = year)) +
   geom_col() +
+  theme_minimal() +
   coord_flip() +
   scale_y_continuous(labels = label_number(suffix = " M", scale = 1e-6)) +
   labs(y = "Passengers", x = "Year") +
   ggtitle("Passengers Count Over the Years") +
   theme(legend.position="none")
 
+
 # 4. Distribution of Region of Flights ====
 
 distRegion = data_new %>% 
   group_by(region) %>%
+  filter(type == "Enplaned") %>%
   summarize(total_count=n(),
             .groups = 'drop')
 
-ggplot(data = distRegion, aes(x = "", y = -total_count, 
+plot3 <- ggplot(data = distRegion, aes(x = "", y = -total_count, 
                               fill = reorder(region, -total_count))) + 
   geom_bar(stat = "identity", color = "black") + 
-  labs(title = "Distribution of Region of Flight", x = "", fill = "Region") +
+  labs(title = "Distribution of Region of Enplaned Flight Destination", x = "", fill = "Region") +
   coord_polar("y") +
   theme_void() +
   geom_text(aes(label = paste0(total_count)),
             position = position_stack(vjust = 0.5))
-
+plot3 + theme(
+  plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"))
 
 # Prediction of Type of Terminal using Classification (Naïve Bayes) ====
 
@@ -200,38 +204,48 @@ print(cm)
 # Clustering model of Passengers and Flight Count (K Means) ====
 
 # Using the original data
-
 data$Operating.Airline <- as.factor(data$Operating.Airline)
-data$Adjusted.Passenger.Count <- as.numeric(data$Adjusted.Passenger.Count)
+data$Adjusted.Passenger.Count <- as.numeric(data$Passenger.Count)
 
+# Group the adjusted passenger and operating airline
 cluster1 = data %>%
   group_by(Operating.Airline) %>%
-  summarise(countPassenger = sum(Adjusted.Passenger.Count),
+  summarise(countPassenger = sum(Passenger.Count),
             countAirline = n(),
             .groups = 'drop')
 
-plot <- ggplot(cluster1, aes(x = countAirline,
+plot4 <- ggplot(cluster1, aes(x = countAirline,
                      y = countPassenger)) +
-  geom_point() +
+  geom_point()+
+  theme_minimal()+
   labs(title = 'Passengers for each Airline',
        subtitle = 'Grouped by Airline',
        x= 'Airline', y = 'Passengers') +
   scale_y_continuous(labels = label_number(suffix = " M", scale = 1e-6))
-plot + theme(
+plot4 + theme(
   plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
-  axis.title.x = element_text(color="black", size=14, face="bold"),
-  axis.title.y = element_text(color="black", size=14, face="bold")
+  plot.subtitle = element_text(hjust = 0.5, color="black", size=12),
+  axis.title.x = element_text(color="black", size=12, face="bold"),
+  axis.title.y = element_text(color="black", size=12, face="bold")
 )
 
 summary(cluster1)
-cluster1.scaled <- scale(cluster1[, -1])
+cluster2.scaled <- scale(cluster1)
 
 library(factoextra)
 set.seed(123)
 fviz_nbclust(cluster1.scaled, kmeans, method = "wss")
 
 k4 <- kmeans(cluster1.scaled, centers = 4, nstart = 25)
-fviz_cluster(k4, data = cluster1.scaled)
-
+plot <- fviz_cluster(k4, data = cluster1.scaled, ellipse = TRUE, shape = 19) +
+  labs(title= "K-means Clustering ") + 
+  theme_minimal() +
+  xlab("Flights") +
+  ylab("Passengers")
+plot + theme(
+  plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
+  axis.title.x = element_text(color="black", size=12, face="bold"),
+  axis.title.y = element_text(color="black", size=12, face="bold")
+)
 
 

@@ -13,9 +13,9 @@ library(magrittr)
 library(caret)
 library(cluster)
 library(caTools)
-library(animation)
+library(reshape2)
+library(scales)
 library(tidyverse)
-library(fastDummies)
 
 # Print the summary of the imported data
 summary(data)
@@ -135,6 +135,39 @@ plot + theme(
   axis.title.y = element_text(color="black", size=14, face="bold")
 )
 
+# 3. Passenger Count Over the Years ====
+
+passengerYear = data_new %>% 
+  group_by(year) %>%
+  summarize(pax = sum(pax),
+            .groups = 'drop')
+
+data_new %>% 
+  ggplot(mapping = aes(x = reorder(year, desc(year)), y = pax, fill = year)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = label_number(suffix = " M", scale = 1e-6)) +
+  labs(y = "Passengers", x = "Year") +
+  ggtitle("Passengers Count Over the Years") +
+  theme(legend.position="none")
+
+# 4. Distribution of Region of Flights ====
+
+distRegion = data_new %>% 
+  group_by(region) %>%
+  summarize(total_count=n(),
+            .groups = 'drop')
+
+ggplot(data = distRegion, aes(x = "", y = -total_count, 
+                              fill = reorder(region, -total_count))) + 
+  geom_bar(stat = "identity", color = "black") + 
+  labs(title = "Distribution of Region of Flight", x = "", fill = "Region") +
+  coord_polar("y") +
+  theme_void() +
+  geom_text(aes(label = paste0(total_count)),
+            position = position_stack(vjust = 0.5))
+
+
 # Prediction of Type of Terminal using Classification (Naïve Bayes) ====
 
 # Setting set value for model
@@ -163,6 +196,42 @@ prediction <- predict(nbModel, newdata = testdata)
 # Create a confusion matrix
 cm <- confusionMatrix(prediction, testdata$terminal) 
 print(cm)
+
+# Clustering model of Passengers and Flight Count (K Means) ====
+
+# Using the original data
+
+data$Operating.Airline <- as.factor(data$Operating.Airline)
+data$Adjusted.Passenger.Count <- as.numeric(data$Adjusted.Passenger.Count)
+
+cluster1 = data %>%
+  group_by(Operating.Airline) %>%
+  summarise(countPassenger = sum(Adjusted.Passenger.Count),
+            countAirline = n(),
+            .groups = 'drop')
+
+plot <- ggplot(cluster1, aes(x = countAirline,
+                     y = countPassenger)) +
+  geom_point() +
+  labs(title = 'Passengers for each Airline',
+       subtitle = 'Grouped by Airline',
+       x= 'Airline', y = 'Passengers') +
+  scale_y_continuous(labels = label_number(suffix = " M", scale = 1e-6))
+plot + theme(
+  plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
+  axis.title.x = element_text(color="black", size=14, face="bold"),
+  axis.title.y = element_text(color="black", size=14, face="bold")
+)
+
+summary(cluster1)
+cluster1.scaled <- scale(cluster1[, -1])
+
+library(factoextra)
+set.seed(123)
+fviz_nbclust(cluster1.scaled, kmeans, method = "wss")
+
+k4 <- kmeans(cluster1.scaled, centers = 4, nstart = 25)
+fviz_cluster(k4, data = cluster1.scaled)
 
 
 

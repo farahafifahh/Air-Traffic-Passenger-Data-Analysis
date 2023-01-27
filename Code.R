@@ -230,7 +230,7 @@ plot4 + theme(
 )
 
 summary(cluster1)
-cluster2.scaled <- scale(cluster1)
+cluster1.scaled <- scale(cluster1[,-1])
 
 library(factoextra)
 set.seed(123)
@@ -239,7 +239,7 @@ fviz_nbclust(cluster1.scaled, kmeans, method = "wss")
 k4 <- kmeans(cluster1.scaled, centers = 4, nstart = 25)
 plot5 <- fviz_cluster(k4, data = cluster1.scaled, ellipse = TRUE, shape = 19) +
   labs(title= "K-means Clustering ") + 
-  theme_minimal() +
+  theme_bw() +
   xlab("Flights") +
   ylab("Passengers")
 plot5 + theme(

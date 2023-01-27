@@ -237,12 +237,12 @@ set.seed(123)
 fviz_nbclust(cluster1.scaled, kmeans, method = "wss")
 
 k4 <- kmeans(cluster1.scaled, centers = 4, nstart = 25)
-plot <- fviz_cluster(k4, data = cluster1.scaled, ellipse = TRUE, shape = 19) +
+plot5 <- fviz_cluster(k4, data = cluster1.scaled, ellipse = TRUE, shape = 19) +
   labs(title= "K-means Clustering ") + 
   theme_minimal() +
   xlab("Flights") +
   ylab("Passengers")
-plot + theme(
+plot5 + theme(
   plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
   axis.title.x = element_text(color="black", size=12, face="bold"),
   axis.title.y = element_text(color="black", size=12, face="bold")

@@ -173,6 +173,30 @@ plot3 <- ggplot(data = distRegion, aes(x = "", y = -total_count,
 plot3 + theme(
   plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"))
 
+
+# 5. Region and passenger ====
+
+RegionPassenger = data_new %>% 
+  group_by(region) %>%
+  summarize(pax = sum(pax),
+            .groups = 'drop')
+
+# Create box plots to compare the passengers and region
+ggplot(data_new, aes(x = reorder(region, desc(region)), y = pax, fill = region)) +
+  geom_boxplot() +
+  labs(x = "region", y = "Passengers", title = "Relationship between Passengers and Geographical Region")
+
+
+# Create box plots to compare the passengers and activity type
+ggplot(data_new, aes(x = reorder(type, desc(area)), y = pax, fill = type)) +
+  geom_boxplot() +
+  labs(x = "Area", y = "Passengers", title = "Relationship between Activity Type of the Passenger and Passenger Count")
+
+# Create box plots to compare the marks by course preparation status
+ggplot(data_new, aes(x = reorder(type, desc(type)), y = pax, fill = area)) +
+  geom_boxplot() +
+  labs(x = "type", y = "Passengers")
+
 # Prediction of Type of Terminal using Classification (Naïve Bayes) ====
 
 # Setting set value for model

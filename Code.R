@@ -150,7 +150,8 @@ data_new %>%
   scale_y_continuous(labels = label_number(suffix = " M", scale = 1e-6)) +
   labs(y = "Passengers", x = "Year") +
   ggtitle("Passengers Count Over the Years") +
-  theme(legend.position="none")
+  theme(legend.position="none") + theme(
+    plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"))
 
 
 # 4. Distribution of Region of Flights ====
@@ -234,12 +235,16 @@ cluster1.scaled <- scale(cluster1[,-1])
 
 library(factoextra)
 set.seed(123)
-fviz_nbclust(cluster1.scaled, kmeans, method = "wss")
+fviz_nbclust(cluster1.scaled, kmeans, method = "wss") + theme(
+  plot.title = element_text(hjust = 0.5, color="black", size=18, face="bold"),
+  axis.title.x = element_text(color="black", size=12, face="bold"),
+  axis.title.y = element_text(color="black", size=12, face="bold")
+)
 
 k4 <- kmeans(cluster1.scaled, centers = 4, nstart = 25)
 plot5 <- fviz_cluster(k4, data = cluster1.scaled, ellipse = TRUE, shape = 19) +
   labs(title= "K-means Clustering ") + 
-  theme_bw() +
+  theme_minimal() +
   xlab("Flights") +
   ylab("Passengers")
 plot5 + theme(
